@@ -180,4 +180,27 @@ const updateTripStatus = async (req, res) => {
     }
 };
 
-module.exports = { createTrip, updateTripStatus };
+/**
+ * GET /trips
+ * Returns all trips ordered by creation date (newest first).
+ * Roles: Manager, Dispatcher
+ */
+const getTrips = async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('trips')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            return res.status(400).json({ success: false, error: error.message });
+        }
+
+        return res.status(200).json({ success: true, data });
+    } catch (err) {
+        console.error('Get trips error:', err.message);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};
+
+module.exports = { createTrip, updateTripStatus, getTrips };

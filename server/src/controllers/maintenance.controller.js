@@ -65,4 +65,27 @@ const addMaintenance = async (req, res) => {
     }
 };
 
-module.exports = { addMaintenance };
+/**
+ * GET /maintenance
+ * Returns all maintenance logs ordered by date (newest first).
+ * Roles: Manager, SafetyOfficer
+ */
+const getMaintenance = async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('maintenance_logs')
+            .select('*')
+            .order('date', { ascending: false });
+
+        if (error) {
+            return res.status(400).json({ success: false, error: error.message });
+        }
+
+        return res.status(200).json({ success: true, data });
+    } catch (err) {
+        console.error('Get maintenance error:', err.message);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};
+
+module.exports = { addMaintenance, getMaintenance };

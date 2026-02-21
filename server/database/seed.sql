@@ -1,5 +1,5 @@
 -- ============================================================
--- FleetFlow Seed Data
+-- FleetFlow Seed Data (India Edition — INR ₹)
 -- Run this SQL AFTER schema.sql to populate demo data.
 --
 -- NOTE: User IDs must match Supabase Auth users.
@@ -9,46 +9,46 @@
 
 -- ── Example: Insert users (replace UUIDs with actual Supabase Auth user IDs) ──
 -- INSERT INTO users (id, name, email, role) VALUES
---   ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Alice Manager',    'alice@fleetflow.io',  'Manager'),
---   ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Bob Dispatcher',   'bob@fleetflow.io',    'Dispatcher'),
---   ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Carol Safety',     'carol@fleetflow.io',  'SafetyOfficer'),
---   ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'Dave Finance',     'dave@fleetflow.io',   'FinancialAnalyst');
+--   ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Amit Sharma',    'amit@fleetflow.in',    'Manager'),
+--   ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Priya Verma',    'priya@fleetflow.in',   'Dispatcher'),
+--   ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Ravi Iyer',      'ravi@fleetflow.in',    'SafetyOfficer'),
+--   ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'Neha Gupta',     'neha@fleetflow.in',    'FinancialAnalyst');
 
--- ── Vehicles ──
+-- ── Vehicles (Indian Trucks) ──
 INSERT INTO vehicles (name, plate, model, capacity, odometer, status) VALUES
-  ('Freightliner Cascadia',  'FL-1001', 'Cascadia 126',  25000, 4200,  'Available'),
-  ('Volvo VNL 860',          'VL-2002', 'VNL 860',       22000, 8700,  'Available'),
-  ('Kenworth T680',          'KW-3003', 'T680 Next Gen', 24000, 3100,  'Available'),
-  ('Peterbilt 579',          'PB-4004', '579 UltraLoft', 23000, 12500, 'Available'),
-  ('Mack Anthem',            'MA-5005', 'Anthem 64T',    26000, 6800,  'On Trip'),
-  ('International LT',       'IL-6006', 'LT Series',     20000, 1500,  'In Shop');
+  ('Tata Prima 4928.S',      'MH-12-AB-1001', 'Prima 4928.S',        25000, 4200,  'Available'),
+  ('Ashok Leyland 4825',     'KA-01-CD-2002', 'Captain 4825',        22000, 8700,  'Available'),
+  ('Mahindra Blazo X 46',    'TN-09-EF-3003', 'Blazo X 46',         24000, 3100,  'Available'),
+  ('BharatBenz 4228R',       'DL-01-GH-4004', '4228R Heavy Duty',   23000, 12500, 'Available'),
+  ('Eicher Pro 6049',        'GJ-05-IJ-5005', 'Pro 6049',           26000, 6800,  'On Trip'),
+  ('Tata Signa 4825.TK',    'AP-28-KL-6006', 'Signa 4825.TK',     20000, 1500,  'In Shop');
 
--- ── Drivers ──
+-- ── Drivers (Indian Names) ──
 INSERT INTO drivers (name, license_expiry, status) VALUES
-  ('John Carter',     '2027-06-15', 'On Duty'),
-  ('Sarah Mitchell',  '2026-12-01', 'On Duty'),
-  ('Mike Rodriguez',  '2026-03-10', 'On Trip'),
-  ('Emily Chen',      '2025-01-20', 'On Duty'),       -- License EXPIRED (for testing rejection)
-  ('James Wilson',    '2027-09-30', 'Suspended');
+  ('Rajesh Kumar',     '2027-06-15', 'On Duty'),
+  ('Suresh Patel',     '2026-12-01', 'On Duty'),
+  ('Vikram Singh',     '2026-03-10', 'On Trip'),
+  ('Arun Nair',        '2025-01-20', 'On Duty'),       -- License EXPIRED (for testing rejection)
+  ('Manoj Yadav',      '2027-09-30', 'Suspended');
 
--- ── Trips ──
+-- ── Trips (Indian Routes) ──
 INSERT INTO trips (vehicle_id, driver_id, origin, destination, cargo_weight, status) VALUES
-  (1, 1, 'Los Angeles, CA', 'Phoenix, AZ',       18000, 'Draft'),
-  (2, 2, 'Dallas, TX',      'Houston, TX',       15000, 'Draft'),
-  (5, 3, 'Chicago, IL',     'Indianapolis, IN',  20000, 'Dispatched'),
-  (3, 1, 'Miami, FL',       'Atlanta, GA',       12000, 'Completed'),
-  (4, 2, 'Seattle, WA',     'Portland, OR',       8000, 'Cancelled');
+  (1, 1, 'Mumbai, Maharashtra',       'Pune, Maharashtra',                18000, 'Draft'),
+  (2, 2, 'Bengaluru, Karnataka',      'Chennai, Tamil Nadu',              15000, 'Draft'),
+  (5, 3, 'Delhi, NCR',                'Jaipur, Rajasthan',                20000, 'Dispatched'),
+  (3, 1, 'Hyderabad, Telangana',      'Visakhapatnam, Andhra Pradesh',    12000, 'Completed'),
+  (4, 2, 'Ahmedabad, Gujarat',        'Surat, Gujarat',                    8000, 'Cancelled');
 
--- ── Maintenance Logs ──
+-- ── Maintenance Logs (Costs in INR ₹) ──
 INSERT INTO maintenance_logs (vehicle_id, note, cost, date) VALUES
-  (6, 'Engine overhaul — coolant leak detected',       4500.00, '2026-02-18'),
-  (2, 'Brake pad replacement — routine check',          800.00, '2026-02-10'),
-  (4, 'Transmission fluid flush',                       350.00, '2026-01-28');
+  (6, 'Engine overhaul — coolant leak detected',       35000.00, '2026-02-18'),
+  (2, 'Brake pad replacement — routine check',          8500.00, '2026-02-10'),
+  (4, 'Transmission fluid flush',                       4200.00, '2026-01-28');
 
--- ── Fuel Logs ──
+-- ── Fuel Logs (Costs in INR ₹, diesel ~₹90/litre) ──
 INSERT INTO fuel_logs (vehicle_id, liters, cost, date) VALUES
-  (1, 320, 512.00,  '2026-02-19'),
-  (2, 280, 448.00,  '2026-02-18'),
-  (5, 400, 640.00,  '2026-02-17'),
-  (3, 250, 400.00,  '2026-02-15'),
-  (4, 310, 496.00,  '2026-02-14');
+  (1, 320, 28800.00,  '2026-02-19'),
+  (2, 280, 25200.00,  '2026-02-18'),
+  (5, 400, 36000.00,  '2026-02-17'),
+  (3, 250, 22500.00,  '2026-02-15'),
+  (4, 310, 27900.00,  '2026-02-14');

@@ -3,6 +3,9 @@
  * 
  * Verifies the JWT from the Authorization header using Supabase Auth.
  * On success, attaches the user profile (id, email, role) to req.user.
+ * 
+ * Dev Mode: When token is "dev-token", bypasses auth and uses a default Manager profile.
+ * This allows the frontend to work without real Supabase Auth setup.
  */
 
 const supabase = require('../config/supabase');
@@ -19,6 +22,19 @@ const authMiddleware = async (req, res, next) => {
         }
 
         const token = authHeader.split(' ')[1];
+
+        // ── Dev Mode Bypass ──
+        // When using "dev-token" or "demo-token", skip Supabase auth
+        // and use a default Manager profile for full access
+        if (token === 'dev-token' || token === 'demo-token') {
+            req.user = {
+                id: 'dev-user',
+                name: 'Dev Manager',
+                email: 'dev@fleetflow.com',
+                role: 'Manager',
+            };
+            return next();
+        }
 
         // Verify the JWT with Supabase Auth
         const { data: { user }, error } = await supabase.auth.getUser(token);

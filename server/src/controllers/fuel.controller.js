@@ -50,4 +50,27 @@ const addFuelLog = async (req, res) => {
     }
 };
 
-module.exports = { addFuelLog };
+/**
+ * GET /fuel
+ * Returns all fuel logs ordered by date (newest first).
+ * Roles: Manager, FinancialAnalyst
+ */
+const getFuelLogs = async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('fuel_logs')
+            .select('*')
+            .order('date', { ascending: false });
+
+        if (error) {
+            return res.status(400).json({ success: false, error: error.message });
+        }
+
+        return res.status(200).json({ success: true, data });
+    } catch (err) {
+        console.error('Get fuel logs error:', err.message);
+        return res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+};
+
+module.exports = { addFuelLog, getFuelLogs };

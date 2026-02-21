@@ -8,6 +8,8 @@ import { Modal } from '@/components/dashboard/modal'
 import { Button } from '@/components/ui/button'
 import { Plus, AlertTriangle } from 'lucide-react'
 import { fetchVehicles, createVehicle, statusToFrontend } from '@/lib/api'
+import { cn } from '@/lib/utils'
+import { PageTransition, FadeSlideIn, AnimatedTableRow, MagneticButton, SkeletonShimmer } from '@/components/animations/motion'
 
 export default function VehiclesPage() {
   const [vehicles, setVehicles] = useState<any[]>([])
@@ -62,7 +64,7 @@ export default function VehiclesPage() {
       })
       setIsModalOpen(false)
       setFormData({ name: '', plate: '', model: '', capacity: '', odometer: '' })
-      await loadVehicles() // Refresh the list
+      await loadVehicles()
     } catch (err: any) {
       setError(err.message || 'Failed to create vehicle')
     } finally {
@@ -71,76 +73,79 @@ export default function VehiclesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Sidebar />
-      <Topbar title="Vehicle Registry" subtitle="Manage your fleet inventory" />
+      <Topbar title="Vehicle Assets" subtitle="FLEET INVENTORY & STATUS MONITORING" />
 
-      <main className="ml-64 pt-20 pb-12 px-8">
-        {/* Header with Add Button */}
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold text-foreground">All Vehicles</h2>
-          <Button
+      <PageTransition className="ml-64 pt-20 pb-12 px-8">
+        <div className="flex justify-between items-center mb-8">
+          <FadeSlideIn>
+            <h2 className="text-2xl font-black text-white tracking-tight">Fleet Registry</h2>
+          </FadeSlideIn>
+          <MagneticButton
             onClick={handleAddVehicle}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
+            className="bg-primary text-primary-foreground px-6 py-2.5 rounded-xl font-bold text-sm shadow-[0_0_20px_rgba(74,222,128,0.3)] hover:brightness-110 transition-all flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
             Add Vehicle
-          </Button>
+          </MagneticButton>
         </div>
 
-        {/* Vehicles Table */}
-        <div className="bg-card border border-border rounded-lg overflow-hidden shadow-lg">
+        <FadeSlideIn delay={0.2} className="glass-card rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border bg-secondary/50">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Name</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Plate</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Model</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Capacity</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Odometer</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Status</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Health</th>
+                <tr className="border-b border-white/5 bg-white/[0.02]">
+                  <th className="px-6 py-5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Name</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Plate No</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Model</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Capacity</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Odometer</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Status</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Health</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-white/5">
                 {loading ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-muted-foreground">Loading vehicles...</td>
-                  </tr>
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i}>
+                      <td colSpan={7} className="px-6 py-6"><SkeletonShimmer className="h-4 w-full" /></td>
+                    </tr>
+                  ))
                 ) : vehicles.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-6 py-8 text-center text-muted-foreground">No vehicles found</td>
                   </tr>
                 ) : (
-                  vehicles.map((vehicle) => (
-                    <tr key={vehicle.id} className="hover:bg-secondary/20 transition-colors">
-                      <td className="px-6 py-4 text-sm text-foreground font-medium">{vehicle.name}</td>
-                      <td className="px-6 py-4 text-sm text-foreground">{vehicle.plate}</td>
-                      <td className="px-6 py-4 text-sm text-foreground">{vehicle.model}</td>
-                      <td className="px-6 py-4 text-sm text-foreground">{Number(vehicle.capacity).toLocaleString()} kg</td>
-                      <td className="px-6 py-4 text-sm text-foreground">{Number(vehicle.odometer).toLocaleString()} km</td>
-                      <td className="px-6 py-4 text-sm">
-                        <StatusPill status={statusToFrontend(vehicle.status) as any} />
+                  vehicles.map((vehicle, i) => (
+                    <AnimatedTableRow key={vehicle.id} index={i} className="group hover:bg-white/[0.02] transition-colors">
+                      <td className="px-6 py-4">
+                        <p className="text-sm font-bold text-white">{vehicle.name}</p>
+                        <p className="text-[10px] text-muted-foreground/40 font-mono tracking-tighter">ID: V-{vehicle.id + 100}</p>
                       </td>
-                      <td className="px-6 py-4 text-sm">
+                      <td className="px-6 py-4 text-xs font-mono text-muted-foreground group-hover:text-primary transition-colors">{vehicle.plate}</td>
+                      <td className="px-6 py-4 text-xs text-muted-foreground">{vehicle.model}</td>
+                      <td className="px-6 py-4 text-xs text-foreground font-semibold">{(vehicle.capacity / 1000).toFixed(1)}t</td>
+                      <td className="px-6 py-4 text-xs text-muted-foreground font-mono">{Number(vehicle.odometer).toLocaleString()} km</td>
+                      <td className="px-6 py-4"><StatusPill status={statusToFrontend(vehicle.status) as any} /></td>
+                      <td className="px-6 py-4">
                         {vehicle.maintenance_flag ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-yellow-900/30 text-yellow-300 border border-yellow-800">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 uppercase tracking-tight">
                             <AlertTriangle className="w-3 h-3" />
                             {vehicle.maintenance_flag}
                           </span>
                         ) : (
-                          <span className="text-green-400 text-xs font-medium">Healthy</span>
+                          <span className="text-primary text-[10px] font-bold uppercase tracking-widest">Optimal</span>
                         )}
                       </td>
-                    </tr>
+                    </AnimatedTableRow>
                   ))
                 )}
               </tbody>
             </table>
           </div>
-        </div>
-      </main>
+        </FadeSlideIn>
+      </PageTransition>
 
       {/* Add Vehicle Modal */}
       <Modal
@@ -160,7 +165,7 @@ export default function VehiclesPage() {
             <label className="block text-sm font-medium text-foreground mb-1">Vehicle Name</label>
             <input
               type="text"
-              placeholder="e.g., Freightliner Cascadia"
+              placeholder="e.g., Tata Prima 4928"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -170,7 +175,7 @@ export default function VehiclesPage() {
             <label className="block text-sm font-medium text-foreground mb-1">License Plate</label>
             <input
               type="text"
-              placeholder="e.g., FL-001"
+              placeholder="e.g., MH-12-AB-1001"
               value={formData.plate}
               onChange={(e) => setFormData({ ...formData, plate: e.target.value })}
               className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -180,7 +185,7 @@ export default function VehiclesPage() {
             <label className="block text-sm font-medium text-foreground mb-1">Model</label>
             <input
               type="text"
-              placeholder="e.g., Cascadia 126"
+              placeholder="e.g., Prima 4928.S"
               value={formData.model}
               onChange={(e) => setFormData({ ...formData, model: e.target.value })}
               className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"

@@ -5,6 +5,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Truck, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { motion } from 'framer-motion'
+import { LiquidEther } from '@/components/animations/liquid-ether'
+import { FadeSlideIn, MagneticButton } from '@/components/animations/motion'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -21,11 +24,9 @@ export default function LoginPage() {
     setIsLoading(true)
     setError('')
 
-    // Demo bypass — allow demo credentials to work without Supabase setup
     const isDemoLogin = email === 'demo@fleetflow.com' && password === 'demo123'
 
     try {
-      // Call the backend login API
       const res = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -35,7 +36,6 @@ export default function LoginPage() {
       const data = await res.json()
 
       if (!res.ok || !data.success) {
-        // If demo credentials were used but backend auth failed, bypass to dashboard
         if (isDemoLogin) {
           loginAsDemo()
           return
@@ -45,14 +45,10 @@ export default function LoginPage() {
         return
       }
 
-      // Store token and user profile in localStorage
       localStorage.setItem('fleetflow_token', data.data.access_token)
       localStorage.setItem('fleetflow_user', JSON.stringify(data.data.user))
-
-      // Navigate to dashboard
       router.push('/dashboard')
     } catch {
-      // If backend is unreachable, use demo bypass
       loginAsDemo()
     } finally {
       setIsLoading(false)
@@ -71,128 +67,155 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden">
+      <LiquidEther
+        colors={['#5227FF', '#FF9FFC', '#B19EEF']}
+        mouseForce={20}
+        cursorSize={100}
+        isViscous
+        viscous={30}
+        iterationsViscous={32}
+        iterationsPoisson={32}
+        resolution={0.5}
+        isBounce={false}
+        autoDemo
+        autoSpeed={0.5}
+        autoIntensity={2.2}
+        takeoverDuration={0.25}
+        autoResumeDelay={3000}
+        autoRampDuration={0.6}
+        color0="#5227FF"
+        color1="#FF9FFC"
+        color2="#B19EEF"
+      />
+
+      <motion.div
+        className="relative z-10 w-full max-w-md"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/60 rounded-xl flex items-center justify-center shadow-lg">
-              <Truck className="w-8 h-8 text-primary-foreground" />
+          <FadeSlideIn direction="up" delay={0.1}>
+            <div className="flex justify-center mb-4">
+              <motion.div
+                className="w-16 h-16 bg-primary/20 backdrop-blur-xl border border-primary/30 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(74,222,128,0.2)]"
+                whileHover={{ rotate: 5, scale: 1.05 }}
+              >
+                <Truck className="w-8 h-8 text-primary" />
+              </motion.div>
             </div>
-          </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">FleetFlow</h1>
-          <p className="text-muted-foreground">Fleet & Logistics Management Dashboard</p>
+            <h1 className="text-4xl font-black text-white mb-2 tracking-tighter uppercase">FleetFlow</h1>
+            <p className="text-muted-foreground/60 text-xs font-bold tracking-[0.2em] uppercase">Logistics Intelligence</p>
+          </FadeSlideIn>
         </div>
 
         {/* Login Card */}
-        <div className="bg-card border border-border rounded-xl p-8 shadow-2xl">
-          <h2 className="text-xl font-semibold text-foreground mb-6">Welcome Back</h2>
+        <FadeSlideIn delay={0.2} className="glass-card p-8 rounded-3xl border-white/10 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg mb-4 text-sm">
-              {error}
-            </div>
-          )}
+          <div className="relative z-10">
+            <h2 className="text-xl font-black text-white mb-6 tracking-tight uppercase">Security Access</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email Input */}
-            <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-foreground">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-              />
-            </div>
+            {error && (
+              <motion.div
+                className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl mb-6 text-xs font-bold uppercase tracking-wider"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+              >
+                {error}
+              </motion.div>
+            )}
 
-            {/* Password Input */}
-            <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-foreground">
-                Password
-              </label>
-              <div className="relative">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1">
+                  Identifier
+                </label>
                 <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  type="email"
+                  placeholder="name@fleetflow.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  className="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white placeholder:text-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1">
+                  Passkey
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white placeholder:text-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-primary transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider">
+                <label className="flex items-center gap-2 cursor-pointer group/check">
+                  <div className="w-4 h-4 rounded border border-white/10 bg-white/5 flex items-center justify-center transition-colors group-hover/check:border-primary/50">
+                    <input type="checkbox" className="hidden" />
+                  </div>
+                  <span className="text-muted-foreground group-hover/check:text-white transition-colors">Persistent Session</span>
+                </label>
+                <Link href="#" className="text-primary/70 hover:text-primary transition-colors">
+                  Lost Credentials?
+                </Link>
+              </div>
+
+              <MagneticButton
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-4 bg-primary text-primary-foreground font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-[0_0_20px_rgba(74,222,128,0.3)] hover:brightness-110 transition-all mt-4"
+              >
+                {isLoading ? 'Verifying...' : 'Authenticate Access'}
+              </MagneticButton>
+            </form>
+
+            {/* Divider */}
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/5" />
+              </div>
+              <div className="relative flex justify-center text-[10px] font-bold tracking-widest uppercase">
+                <span className="px-4 bg-[#0a0a0a]/50 backdrop-blur-md text-muted-foreground/40">Diagnostic Access</span>
               </div>
             </div>
 
-            {/* Remember Me */}
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded bg-secondary border-border cursor-pointer"
-                />
-                <span className="text-foreground">Remember me</span>
-              </label>
-              <Link
-                href="#"
-                className="text-primary hover:text-primary/90 transition-colors"
-              >
-                Forgot password?
-              </Link>
-            </div>
-
-            {/* Login Button */}
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full h-10 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 font-semibold mt-6"
-            >
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </form>
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-card text-muted-foreground">Demo Account</span>
+            {/* Demo Info */}
+            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-muted-foreground/60 uppercase">System ID</span>
+                <span className="text-[10px] font-mono text-primary/80">demo@fleetflow.com</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-muted-foreground/60 uppercase">Access Key</span>
+                <span className="text-[10px] font-mono text-primary/80">demo123</span>
+              </div>
             </div>
           </div>
-
-          {/* Demo Info */}
-          <div className="bg-secondary/50 border border-border rounded-lg p-4 text-sm">
-            <p className="text-muted-foreground mb-2">
-              <strong className="text-foreground">Demo Email:</strong> demo@fleetflow.com
-            </p>
-            <p className="text-muted-foreground">
-              <strong className="text-foreground">Demo Password:</strong> demo123
-            </p>
-          </div>
-        </div>
+        </FadeSlideIn>
 
         {/* Footer */}
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          Made with &hearts; by FleetFlow Team
-        </p>
-      </div>
+        <FadeSlideIn delay={0.4} direction="up" className="text-center text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.3em] mt-10">
+          Built with &hearts; for the FleetFlow Ecosystem v1.2
+        </FadeSlideIn>
+      </motion.div>
     </div>
   )
 }

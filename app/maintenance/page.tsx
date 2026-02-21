@@ -6,7 +6,10 @@ import { Topbar } from '@/components/layout/topbar'
 import { Modal } from '@/components/dashboard/modal'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
-import { fetchMaintenance, fetchVehicles, addMaintenance, getVehicleName } from '@/lib/api'
+import { fetchMaintenance, fetchVehicles, addMaintenance, getVehicleName, statusToFrontend } from '@/lib/api'
+import { cn } from '@/lib/utils'
+import { PageTransition, FadeSlideIn, AnimatedTableRow, MagneticButton, SkeletonShimmer } from '@/components/animations/motion'
+import { motion } from 'framer-motion'
 
 export default function MaintenancePage() {
   const [logs, setLogs] = useState<any[]>([])
@@ -70,76 +73,70 @@ export default function MaintenancePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Sidebar />
-      <Topbar title="Maintenance Logs" subtitle="Track vehicle maintenance and repairs" />
+      <Topbar title="Asset Maintenance" subtitle="SERVICE HISTORY & TECHNICAL LOGS" />
 
-      <main className="ml-64 pt-20 pb-12 px-8">
-        {success && (
-          <div className="mb-4 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg text-sm">
-            {success}
-          </div>
-        )}
-
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold text-foreground">Maintenance Records</h2>
-          <Button
+      <PageTransition className="ml-64 pt-20 pb-12 px-8">
+        <div className="flex justify-between items-center mb-8">
+          <FadeSlideIn>
+            <h2 className="text-2xl font-black text-white tracking-tight">Maintenance Logs</h2>
+          </FadeSlideIn>
+          <MagneticButton
             onClick={() => { setError(''); setIsModalOpen(true) }}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
+            className="bg-primary text-primary-foreground px-6 py-2.5 rounded-xl font-bold text-sm shadow-[0_0_20px_rgba(74,222,128,0.3)] hover:brightness-110 transition-all flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
-            Add Maintenance
-          </Button>
+            New Service Entry
+          </MagneticButton>
         </div>
 
-        <div className="bg-card border border-border rounded-lg overflow-hidden shadow-lg">
+        <FadeSlideIn delay={0.2} className="glass-card rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border bg-secondary/50">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Vehicle</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Service Description</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Cost</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Date</th>
+                <tr className="border-b border-white/5 bg-white/[0.02]">
+                  <th className="px-6 py-5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Vehicle</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Service Description</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Cost (INR)</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-white/5">
                 {loading ? (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">Loading...</td>
-                  </tr>
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i}>
+                      <td colSpan={4} className="px-6 py-6"><SkeletonShimmer className="h-4 w-full" /></td>
+                    </tr>
+                  ))
                 ) : logs.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">No maintenance records</td>
+                    <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground font-mono text-xs italic opacity-50">No service records found in repository</td>
                   </tr>
                 ) : (
-                  logs.map((log) => (
-                    <tr key={log.id} className="hover:bg-secondary/20 transition-colors">
-                      <td className="px-6 py-4 text-sm text-foreground font-medium">
-                        {getVehicleName(log.vehicle_id, vehicles)}
+                  logs.map((log, i) => (
+                    <AnimatedTableRow key={log.id} index={i} className="group hover:bg-white/[0.02] transition-colors">
+                      <td className="px-6 py-4 text-sm font-bold text-white">{getVehicleName(log.vehicle_id, vehicles)}</td>
+                      <td className="px-6 py-4 text-xs text-muted-foreground/80">{log.note}</td>
+                      <td className="px-6 py-4 text-xs font-mono text-primary font-bold">₹{Number(log.cost).toLocaleString('en-IN')}</td>
+                      <td className="px-6 py-4 text-xs text-muted-foreground">
+                        {new Date(log.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </td>
-                      <td className="px-6 py-4 text-sm text-foreground">{log.note}</td>
-                      <td className="px-6 py-4 text-sm font-semibold text-accent">
-                        ${Number(log.cost).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-foreground">
-                        {new Date(log.date).toLocaleDateString()}
-                      </td>
-                    </tr>
+                    </AnimatedTableRow>
                   ))
                 )}
               </tbody>
             </table>
           </div>
-        </div>
-      </main>
+        </FadeSlideIn>
+      </PageTransition>
 
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Add Maintenance Record"
+        title="Engineering Service Registry"
         onSubmit={handleSubmit}
-        submitLabel={submitting ? 'Adding...' : 'Add Record'}
+        submitLabel={submitting ? 'Archiving...' : 'Register Service'}
       >
         <div className="space-y-4">
           {error && (
@@ -147,48 +144,52 @@ export default function MaintenancePage() {
               {error}
             </div>
           )}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Vehicle</label>
-            <select
-              value={formData.vehicle_id}
-              onChange={(e) => setFormData({ ...formData, vehicle_id: e.target.value })}
-              className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="">Select vehicle...</option>
-              {vehicles.map((v) => (
-                <option key={v.id} value={v.id}>{v.plate} - {v.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Service Description</label>
-            <textarea
-              placeholder="Describe the maintenance work..."
-              value={formData.note}
-              onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-              className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-              rows={3}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Cost ($)</label>
-              <input
-                type="number"
-                placeholder="0.00"
-                value={formData.cost}
-                onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
-                className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Asset Selection</label>
+              <select
+                value={formData.vehicle_id}
+                onChange={(e) => setFormData({ ...formData, vehicle_id: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all appearance-none"
+              >
+                <option value="" className="bg-[#080808]">Select Portfolio Asset</option>
+                {vehicles.map((v) => (
+                  <option key={v.id} value={v.id} className="bg-[#080808]">{v.name} ({v.plate})</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Technical Description</label>
+              <textarea
+                placeholder="Major engine overhaul, technical audit, etc."
+                value={formData.note}
+                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
+                rows={3}
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Date</label>
-              <input
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Audit Cost (₹)</label>
+                <input
+                  type="number"
+                  placeholder="0.00"
+                  value={formData.cost}
+                  onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Log Date</label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                />
+              </div>
             </div>
           </div>
         </div>
